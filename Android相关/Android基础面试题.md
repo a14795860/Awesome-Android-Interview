@@ -150,6 +150,20 @@ Serializable 是序列化的意思，表示将一个对象转换成存储或可�
 
 #### 8、动画
 
+- View 动画：
+    - 作用对象是 View，可用 xml 定义，建议 xml 实现比较易读
+    - 支持四种效果：平移、缩放、旋转、透明度
+- 帧动画：
+    - 通过 AnimationDrawable 实现，容易 OOM
+- 属性动画：
+    - 可作用于任何对象，可用 xml 定义，Android 3 引入，建议代码实现比较灵活
+    - 包括 ObjectAnimator、ValuetAnimator、AnimatorSet
+    - 时间插值器：根据时间流逝的百分比计算当前属性改变的百分比，系统预置匀速、加速、减速等插值器
+    - 类型估值器：根据当前属性改变的百分比计算改变后的属性值，系统预置整型、浮点、色值等类型估值器
+    - 使用注意事项：避免使用帧动画，容易OOM；界面销毁时停止动画，避免内存泄漏；开启硬件加速，提高动画流畅性
+    - 硬件加速原理：将 cpu 一部分工作分担给 gpu ，使用 gpu 完成绘制工作；从工作分摊和绘制机制两个方面优化了绘制速度
+
+
 - tween 补间动画。通过指定View的初末状态和变化方式，对View的内容完成一系列的图形变换来实现动画效果。 Alpha, Scale ,Translate, Rotate。
 - frame 帧动画。AnimationDrawable控制animation-list.xml布局
 - PropertyAnimation 属性动画3.0引入，属性动画核心思想是对值的变化。
@@ -530,6 +544,9 @@ Handler.Callback 有优先处理消息的权利 ，当一条消息被 Callback 
 ##### handler postDelay这个延迟是怎么实现的？
 
 handler.postDelay并不是先等待一定的时间再放入到MessageQueue中，而是直接进入MessageQueue，以MessageQueue的时间顺序排列和唤醒的方式结合实现的。
+
+##### 如何保证在msg.postDelay情况下保证消息次序？
+
 
 [Handler 都没搞懂，拿什么去跳槽啊？](https://juejin.im/post/5c74b64a6fb9a049be5e22fc#heading-7)
 
@@ -1598,59 +1615,31 @@ dimens使用：
 本地加载图片前判断手机分辨率或像素密度，向服务器请求对应级别图片。
 
 
-#### 95、动态布局的理解
+#### 95、断点续传实现？
 
-#### 96、怎么去除重复代码？
+##### 基础知识：
 
-#### 97、Recycleview和ListView的区别
+- Http基础：在Http请求中，可以加入请求头Range，下载指定区间的文件数。
+- RandomAccessFile：支持随机访问，可以从指定位置进行数据的读写。
 
-#### 98、动态权限适配方案，权限组的概念
+有了这个基础以后，思路就清晰了：
 
-#### 99、Android系统为什么会设计ContentProvider？
+- 通过HttpUrlConnection获取文件长度。
+- 自己分配好线程进行制定区间的文件数据的下载。
+- 获取到数据流以后，使用RandomAccessFile进行指定位置的读写。
 
-#### 100、下拉状态栏是不是影响activity的生命周期
-
-#### 101、如果在onStop的时候做了网络请求，onResume的时候怎么恢复？
-
-#### 102、Debug和Release状态的不同
-
-#### 103、dp是什么，sp呢，有什么区别
-
-#### 103、自定义View，ViewGroup注意那些回调？
-
-#### 104、android中的存储类型
-
-#### 105、Activity的生命周期，finish调用后其他生命周期还会走么？
-
-#### 106、[有遇到过哪些屏幕和资源适配问题](https://www.jianshu.com/p/46ce37b8553c)？
-
-#### 107、[项目中遇到哪些难题，最终你是如何解决的](https://www.jianshu.com/p/69d9444e2a9a)？
-
-#### 108、[listview图片加载错乱的原理和解决方案](https://blog.csdn.net/guolin_blog/article/details/45586553)。
-
-#### 109、invalidate和requestLayout的区别及使用。
-
-#### 110、如何反编译，对代码逆向分析。
-
-#### 111、RemoteViews实现和使用场景
-
-#### 112、对服务器众多错误码的处理（错误码有好几万个）
-
-#### 113、adb常用命令行 
-
-#### 114、Android中如何查看一个对象的回收情况？
-
-#### 115、[Activity正常和异常情况下的生命周期](http://blog.csdn.net/geekerhw/article/details/48749935)
-
-#### 116、[关于< include >< merge >< stub >三者的使用场景](http://www.trinea.cn/android/layout-performance/)
-
-#### 117、[Android对HashMap做了优化后推出的新的容器类是什么？](http://blog.csdn.net/u010687392/article/details/47809295)
-
-#### 118、说下你对服务的理解，如何杀死一个服务。
-
-#### 119、断点续传实现？
 
 在本地下载过程中要使用数据库实时存储到底存储到文件的哪个位置了，这样点击开始继续传递时，才能通过HTTP的GET请求中的setRequestProperty("Range","bytes=startIndex-endIndex");方法可以告诉服务器，数据从哪里开始，到哪里结束。同时在本地的文件写入时，RandomAccessFile的seek()方法也支持在文件中的任意位置进行写入操作。最后通过广播或事件总线机制将子线程的进度告诉Activity的进度条。关于断线续传的HTTP状态码是206，即HttpStatus.SC_PARTIAL_CONTENT。
+
+
+#### 96、[项目中遇到哪些难题，最终你是如何解决的](https://www.jianshu.com/p/69d9444e2a9a)？
+
+#### 97、[Activity正常和异常情况下的生命周期](http://blog.csdn.net/geekerhw/article/details/48749935)
+
+#### 98、[关于< include >< merge >< stub >三者的使用场景](http://www.trinea.cn/android/layout-performance/)
+
+#### 99、[Android对HashMap做了优化后推出的新的容器类是什么？](http://blog.csdn.net/u010687392/article/details/47809295)
+
 
 
 
